@@ -8,7 +8,7 @@ class UsersMessageRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def _check(self, user_id: int, media_group_id: str):
+    async def _check(self, user_id: int, media_group_id: str | None):
         user = await self.session.execute(
             select(UsersMessageModel.id).where(
                 and_(
@@ -27,7 +27,7 @@ class UsersMessageRepository:
         )
 
     async def save(
-        self, message: str, user_id: int, media_group_id: str, message_type: str
+        self, message: str, user_id: int, media_group_id: str | None, message_type: str
     ):
         check_records = await self._check(user_id, media_group_id)
         if check_records is False:
