@@ -1,28 +1,37 @@
 import asyncio
 from aiogram import Bot, Dispatcher
-from handlers import message
-from aiogram.client.session.aiohttp import AiohttpSession
-import aiohttp
+from fastapi import FastAPI
+from presentation.handlers.message import router as bot_router_message
+from presentation.api.endpoints.save_message import router as api_router
+from presentation.handlers.keyboards import router as bot_router_keyboards
+import uvicorn
+from infrastructure.config import settings
 
-token = '8300080133:AAEdI4elJD_24r1qnkkIoXiZITFTlZE85c0'
-TOKEN = token
-
-bot = Bot(token=TOKEN)
-# session = AiohttpSession(
-#     timeout=aiohttp.ClientTimeout(total=60)
-# )
-
-# bot.session.timeout = 60
+bot = Bot(token=settings.BOT_TOKEN)
 dp = Dispatcher()
+dp.include_router(bot_router_message)
+dp.include_router(bot_router_keyboards)
 
-dp.include_router(message.router)
+app = FastAPI()
+app.include_router(api_router)
 
 
-async def main():
+async def start_bot():
     try:
         await dp.start_polling(bot)
     finally:
         await bot.session.close()
 
-if __name__ == '__main__':
+
+async def start_server():
+    config = uvicorn.Config(app, host="127.0.0.1", port=8000)
+    server = uvicorn.Server(config)
+    await server.serve()
+
+
+async def main():
+    await asyncio.gather(start_bot(), start_server())
+
+
+if __name__ == "__main__":
     asyncio.run(main())
