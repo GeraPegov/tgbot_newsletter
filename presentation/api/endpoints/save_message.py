@@ -18,14 +18,15 @@ async def save(
         media_group_id=message_from_bot.media_group_id,
         message_type=message_from_bot.message_type
     )
+    return {'status': 'okay'}
 
 @router.get('/message/records/{user_id}')
 async def records(
     user_id: int,
     message_service: UsersMessageService = Depends(get_message_service)
 ):
-    records = await message_service.get_messages(user_id)
-    return {'records': records}
+    messages = await message_service.get_messages(user_id)
+    return {'messages': messages}
 
 
 @router.get('/message/users')

@@ -1,3 +1,4 @@
+
 from sqlalchemy import and_, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,7 +9,7 @@ class UsersMessageRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def _check(self, user_id: int, media_group_id: str | None):
+    async def _check(self, user_id: int, media_group_id: str | None) -> bool:
         user = await self.session.execute(
             select(UsersMessageModel.id).where(
                 and_(
@@ -21,38 +22,50 @@ class UsersMessageRepository:
         check_live = user.all()
         return True if len(check_live) > 0 else False
 
-    async def _delete(self, user_id: int):
+    async def _delete(self, user_id: int) -> bool:
         await self.session.execute(
             delete(UsersMessageModel).where(UsersMessageModel.user_id == user_id)
         )
+        return True
+        
 
     async def save(
         self, message: str, user_id: int, media_group_id: str | None, message_type: str
-    ):
-        check_records = await self._check(user_id, media_group_id)
-        if check_records is False:
-            await self._delete(user_id)
+    ) -> bool:
+        try:
+            check_records = await self._check(user_id, media_group_id)
+            if check_records is False:
+                await self._delete(user_id)
 
-        objects = UsersMessageModel(
-            user_id=user_id,
-            message=message,
-            media_group_id=media_group_id,
-            message_type=message_type,
-        )
-        self.session.add(objects)
-        await self.session.commit()
-        return True
+            objects = UsersMessageModel(
+                user_id=user_id,
+                message=message,
+                media_group_id=media_group_id,
+                message_type=message_type,
+            )
+            self.session.add(objects)
+            await self.session.commit()
+            return True
+        except Exception:
+            await self.session.rollback()
+            return False
 
-    async def get_message(self, user_id: int):
+    async def get_message(self, user_id: int) -> list[list] | None:
         messages = await self.session.execute(
             select(UsersMessageModel.message, UsersMessageModel.message_type).where(
                 UsersMessageModel.user_id == user_id
             )
         )
         records = messages.all()
-        return records
+        if len(records) == 0:
+            return None
+        messages = []
+        for record in records:
+            message, type_message = record
+            messages.append([message, type_message])
+        return messages
 
-    async def get_users(self):
+    async def get_users(self) -> list | None:
         users = (
             (
                 await self.session.execute(
@@ -65,4 +78,4 @@ class UsersMessageRepository:
             .all()
         )
 
-        return users
+        return list(users) if len(users) > 0 else None

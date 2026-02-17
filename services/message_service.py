@@ -15,9 +15,9 @@ class UsersMessageService:
         return result
 
     async def get_messages(self, user_id):
-        data = await self.cache.get_message(user_id)
-        if data:
-            return data
+        messages = await self.cache.get_message(user_id)
+        if messages:
+            return messages
         return await self.repo.get_message(user_id)
 
     async def get_users(self):

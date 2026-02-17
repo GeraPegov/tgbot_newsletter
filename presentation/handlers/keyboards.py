@@ -22,29 +22,36 @@ router = Router()
 async def process_send_out(callback: CallbackQuery, bot: Bot):
     await callback.answer()
     user_id = callback.from_user.id
-    async with aiohttp.ClientSession() as session:
-        async with session.get(
-            url=f"http://localhost:8000/message/records/{user_id}"
-        ) as resp:
-            data = (await resp.json())["records"]
 
-        async with session.get(url="http://localhost:8000/message/users") as resp:
-            users = (await resp.json())["users"]
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"http://localhost:8000/message/records/{user_id}") as resp:
+                messages = (await resp.json())["messages"]
+            async with session.get("http://localhost:8000/message/users") as resp:
+                users = (await resp.json())["users"]
+    except aiohttp.ClientError:
+        await bot.send_message(user_id, 'Сервис недоступен')
+
+    if not messages:
+        await bot.send_message(user_id, "Нет данных")
+        return
+
+    for user in users:
+        await send_to_user(bot, user, messages)
+
+
+async def send_to_user(bot: Bot, user_id: int, messages: list):
+    for file, file_type in messages:
+        if file_type == "text":
+            await bot.send_message(user_id, file)
+            return
 
     media = []
-    for list_out in data:
-        file, file_type = list_out
-        if file_type == "text":
-            media = file
-            break
-        elif file_type == "photo":
+    for file, file_type in messages:
+        if file_type == "photo":
             media.append(InputMediaPhoto(media=file))
         elif file_type == "video":
             media.append(InputMediaVideo(media=file))
 
-    if isinstance(media, list):
-        for user in users:
-            await bot.send_media_group(user, media)
-    elif isinstance(media, str):
-        for user in users:
-            await bot.send_message(user, media)
+    if media:
+        await bot.send_media_group(user_id, media)

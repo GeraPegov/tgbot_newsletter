@@ -58,13 +58,12 @@ async def test_get_users(async_session, test_message_postgres):
     repo = UsersMessageRepository(async_session)
 
     users = await repo.get_users()
-
     assert users[0] == test_message_postgres.user_id
 
     await repo._delete(test_message_postgres.user_id)
     users = await repo.get_users()
 
-    assert len(users) == 0
+    assert users is None
 
 @pytest.mark.asyncio
 async def test_get_message(async_session, test_message_postgres):
