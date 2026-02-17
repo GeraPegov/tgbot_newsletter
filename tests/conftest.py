@@ -1,7 +1,9 @@
 
+import json
 from pathlib import Path
 import sys
 import pytest_asyncio
+from redis.asyncio import Redis
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 import pytest
@@ -50,9 +52,22 @@ async def async_session(engine):
         yield session
         await session.rollback()
 
+@pytest_asyncio.fixture(scope='function')
+async def get_redis():
+    redis = Redis(
+        host='localhost',
+        port=6379,
+        db=2,
+        decode_responses=True
+    )
+    yield redis
+    await redis.flushall()
+    await redis.aclose()
+
+
 
 @pytest_asyncio.fixture
-async def test_record(async_session):
+async def test_message_postgres(async_session):
     test_message = UsersMessageModel(
         user_id=1,
         media_group_id='1',
@@ -63,3 +78,9 @@ async def test_record(async_session):
     await async_session.commit()
     await async_session.refresh(test_message)
     return test_message
+
+@pytest_asyncio.fixture
+async def test_message_redis(get_redis):
+    message = json.dumps({'message': 'text', 'type': 'str'})
+    await get_redis.rpush('1:1:str', message)
+

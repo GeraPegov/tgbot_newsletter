@@ -6,7 +6,7 @@ class UsersCache:
     def __init__(self, session: Redis):
         self.session = session
 
-    async def _check(self, user_id: int, media_group_id: str):
+    async def _check(self, user_id: int, media_group_id: str | None):
         key = await self.session.keys(f"{str(user_id)}:{media_group_id}:*")
         return True if len(key) > 0 and key[0].split(":")[1] != "None" else False
 
@@ -16,7 +16,7 @@ class UsersCache:
             await self.session.delete(*keys_to_delete)
 
     async def save(
-        self, user_id: int, message: str, media_group_id: str, message_type: str
+        self, user_id: int, message: str, media_group_id: str | None, message_type: str
     ):
         check_records = await self._check(user_id, media_group_id)
         if check_records is False:

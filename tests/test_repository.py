@@ -19,7 +19,7 @@ async def test_save(async_session):
     assert result is True
 
 @pytest.mark.asyncio
-async def test_check(async_session, test_record):
+async def test_check(async_session, test_message_postgres):
     repo = UsersMessageRepository(async_session)
 
     result = await repo._check(
@@ -42,16 +42,40 @@ async def test_check(async_session, test_record):
     assert result is False
 
 @pytest.mark.asyncio
-async def test_delete(async_session, test_record):
+async def test_delete(async_session, test_message_postgres):
     repo = UsersMessageRepository(async_session)
-    await repo._delete(test_record.user_id)
+    await repo._delete(test_message_postgres.user_id)
 
     user = await async_session.execute(
         select(UsersMessageModel.id)
-        .where(UsersMessageModel.user_id==test_record.user_id)
+        .where(UsersMessageModel.user_id==test_message_postgres.user_id)
     )
 
     assert user.scalar_one_or_none() is None
+
+@pytest.mark.asyncio
+async def test_get_users(async_session, test_message_postgres):
+    repo = UsersMessageRepository(async_session)
+
+    users = await repo.get_users()
+
+    assert users[0] == test_message_postgres.user_id
+
+    await repo._delete(test_message_postgres.user_id)
+    users = await repo.get_users()
+
+    assert len(users) == 0
+
+@pytest.mark.asyncio
+async def test_get_message(async_session, test_message_postgres):
+    repo = UsersMessageRepository(async_session)
+
+    message = await repo.get_message(test_message_postgres.user_id)
+
+    assert message[0][0] == test_message_postgres.message
+    assert message[0][1] == test_message_postgres.message_type
+
+
 
 
 
