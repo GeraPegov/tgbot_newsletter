@@ -33,6 +33,7 @@ async def process_send_out(callback: CallbackQuery, bot: Bot):
                 users = (await resp.json())["users"]
     except aiohttp.ClientError:
         await bot.send_message(user_id, "Сервис недоступен")
+        return
 
     if not messages:
         await bot.send_message(user_id, "Нет данных")

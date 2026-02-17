@@ -1,3 +1,4 @@
+import asyncio
 import json
 import time
 import pytest
@@ -40,11 +41,11 @@ async def test_save(get_redis: Redis):
     result = json.loads(message[0])
     assert result["message"] == "text"
     assert result["type"] == "str"
+    ttl_base = await get_redis.ttl("1:None:str")
+    assert ttl_base == 3600
+    await asyncio.sleep(2)
     ttl = await get_redis.ttl("1:None:str")
-    assert ttl == 3600
-    time.sleep(2)
-    ttl = await get_redis.ttl("1:None:str")
-    assert ttl == 3598
+    assert ttl == ttl_base - 2
 
 
 @pytest.mark.asyncio

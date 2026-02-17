@@ -7,7 +7,7 @@ class UsersMessageService:
         self.repo = repo
         self.cache = cache
 
-    async def save_messages(
+    async def save_message(
         self, message: str, user_id: int, media_group_id: str, message_type: str
     ):
         result = await self.repo.save(message, user_id, media_group_id, message_type)
@@ -15,10 +15,10 @@ class UsersMessageService:
         return result
 
     async def get_messages(self, user_id):
-        messages = await self.cache.get_message(user_id)
+        messages = await self.cache.get_messages(user_id)
         if messages:
             return messages
-        return await self.repo.get_message(user_id)
+        return await self.repo.get_messages(user_id)
 
     async def get_users(self):
         return await self.repo.get_users()

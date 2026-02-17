@@ -1,7 +1,7 @@
 from fastapi import Depends
 from fastapi.routing import APIRouter
 
-from presentation.api.shemas.message import MessageModel
+from presentation.api.sсhemas.message import MessageModel
 from presentation.dependencies.get_message_service import get_message_service
 from services.message_service import UsersMessageService
 
@@ -13,7 +13,7 @@ async def save(
     message_from_bot: MessageModel,
     message_service: UsersMessageService = Depends(get_message_service),
 ):
-    await message_service.save_messages(
+    await message_service.save_message(
         message=message_from_bot.message,
         user_id=message_from_bot.user_id,
         media_group_id=message_from_bot.media_group_id,

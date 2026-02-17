@@ -9,7 +9,7 @@ class UsersMessageRepository:
         self.session = session
 
     async def _check(self, user_id: int, media_group_id: str | None) -> bool:
-        user = await self.session.execute(
+        existence = await self.session.execute(
             select(UsersMessageModel.id).where(
                 and_(
                     UsersMessageModel.user_id == user_id,
@@ -18,8 +18,8 @@ class UsersMessageRepository:
                 )
             )
         )
-        check_live = user.all()
-        return True if len(check_live) > 0 else False
+        check = existence.all()
+        return True if len(check) > 0 else False
 
     async def _delete(self, user_id: int) -> bool:
         await self.session.execute(
@@ -48,7 +48,7 @@ class UsersMessageRepository:
             await self.session.rollback()
             return False
 
-    async def get_message(self, user_id: int) -> list[list] | None:
+    async def get_messages(self, user_id: int) -> list[list] | None:
         messages = await self.session.execute(
             select(UsersMessageModel.message, UsersMessageModel.message_type).where(
                 UsersMessageModel.user_id == user_id
@@ -59,8 +59,8 @@ class UsersMessageRepository:
             return None
         messages = []
         for record in records:
-            message, type_message = record
-            messages.append([message, type_message])
+            message, message_type = record
+            messages.append([message, message_type])
         return messages
 
     async def get_users(self) -> list | None:

@@ -51,7 +51,7 @@ class UsersCache:
         )
 
     @handle_redis_error
-    async def get_message(self, user_id: int):
+    async def get_messages(self, user_id: int):
         key = await self.session.keys(f"{str(user_id)}:*")
         if len(key) == 0:
             return None

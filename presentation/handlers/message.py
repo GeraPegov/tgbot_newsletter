@@ -26,6 +26,7 @@ async def get_photo(message: Message, message_type="photo"):
             )
     except aiohttp.ClientError:
         await message.answer("Сервис недоступен")
+        return
 
     if media_group_id is None or media_group_id not in processed_media_groups:
         if media_group_id:
@@ -75,6 +76,7 @@ async def get_video(message: Message, message_type: str = "video"):
             )
     except aiohttp.ClientError:
         await message.answer("Сервис недоступен")
+        return
 
     if media_group_id is None or media_group_id not in processed_media_groups:
         if media_group_id:
