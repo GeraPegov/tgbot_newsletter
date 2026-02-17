@@ -52,7 +52,7 @@ async def test_save(get_redis: Redis):
 async def test_get_message(get_redis, test_message_redis):
     cache = UsersCache(get_redis)
 
-    message = await cache.get_message(1)
+    message = await cache.get_messages(1)
 
     assert isinstance(message, list)
     assert isinstance(message[0], list)

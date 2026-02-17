@@ -61,7 +61,7 @@ async def test_get_users(async_session, test_message_postgres):
 async def test_get_message(async_session, test_message_postgres):
     repo = UsersMessageRepository(async_session)
 
-    message = await repo.get_message(test_message_postgres.user_id)
+    message = await repo.get_messages(test_message_postgres.user_id)
 
     assert message[0][0] == test_message_postgres.message
     assert message[0][1] == test_message_postgres.message_type
