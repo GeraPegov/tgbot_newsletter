@@ -1,4 +1,3 @@
-
 from sqlalchemy import and_, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -27,7 +26,6 @@ class UsersMessageRepository:
             delete(UsersMessageModel).where(UsersMessageModel.user_id == user_id)
         )
         return True
-        
 
     async def save(
         self, message: str, user_id: int, media_group_id: str | None, message_type: str

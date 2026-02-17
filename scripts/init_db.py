@@ -10,7 +10,7 @@ sys.path.insert(0, str(infrastructure))
 from infrastructure.config import settings
 
 
-async def create_db(db_name: str = "tgbot", test_db_name: str = 'testtgbot'):
+async def create_db(db_name: str = "tgbot", test_db_name: str = "testtgbot"):
     engine = create_async_engine(url=settings.ADMIN_DB_URL)
 
     async with engine.connect() as conn:
@@ -22,6 +22,7 @@ async def create_db(db_name: str = "tgbot", test_db_name: str = 'testtgbot'):
         exists = result.scalar_one_or_none()
         if not exists:
             await conn.execute(text(f"CREATE DATABASE {db_name}"))
+
 
 if __name__ == "__main__":
     asyncio.run(create_db())

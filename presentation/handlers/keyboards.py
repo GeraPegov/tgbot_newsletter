@@ -25,12 +25,14 @@ async def process_send_out(callback: CallbackQuery, bot: Bot):
 
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"http://localhost:8000/message/records/{user_id}") as resp:
+            async with session.get(
+                f"http://localhost:8000/message/records/{user_id}"
+            ) as resp:
                 messages = (await resp.json())["messages"]
             async with session.get("http://localhost:8000/message/users") as resp:
                 users = (await resp.json())["users"]
     except aiohttp.ClientError:
-        await bot.send_message(user_id, 'Сервис недоступен')
+        await bot.send_message(user_id, "Сервис недоступен")
 
     if not messages:
         await bot.send_message(user_id, "Нет данных")

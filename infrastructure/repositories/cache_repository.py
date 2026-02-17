@@ -4,20 +4,26 @@ from redis.asyncio import Redis
 from redis.exceptions import ConnectionError as RedisConnectionError
 from redis.exceptions import TimeoutError as RedisTimeoutError
 
-P = ParamSpec('P')
-T= TypeVar('T')
-def handle_redis_error(func: Callable[P, Awaitable[T]]) -> Callable[P, Awaitable[T | Any]]:
+P = ParamSpec("P")
+T = TypeVar("T")
+
+
+def handle_redis_error(
+    func: Callable[P, Awaitable[T]],
+) -> Callable[P, Awaitable[T | Any]]:
     async def wrapper(*args, **kwargs):
         try:
             return await func(*args, **kwargs)
         except (RedisConnectionError, RedisTimeoutError):
             return None
+
     return wrapper
+
 
 class UsersCache:
     def __init__(self, session: Redis):
         self.session = session
-    
+
     @handle_redis_error
     async def _check(self, user_id: int, media_group_id: str | None):
         key = await self.session.keys(f"{str(user_id)}:{media_group_id}:*")

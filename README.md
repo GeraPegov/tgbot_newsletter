@@ -43,11 +43,7 @@ python scripts/init_table.py
 ```bash
 pytest
 ```
-Возможно придется перезайти в окружение
-```bash
-deactivate
-source .venv/bin/activate
-```
+
 ## Запуск приложения
 Убедитесь что вы в директории проекта
 ```bash
